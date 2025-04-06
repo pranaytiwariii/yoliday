@@ -54,6 +54,7 @@ function App() {
   const [projects, setProjects] = useState<Project[]>(MOCK_PROJECTS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dbConnected, setDbConnected] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -85,9 +86,12 @@ function App() {
           total: data.pagination.total,
           totalPages: data.pagination.totalPages,
         });
+        setDbConnected(true);
       } catch (err) {
-        setError("Failed to fetch projects. Please try again later.");
-        console.error(err);
+        console.error("Error fetching projects:", err);
+        setError("Failed to fetch projects. Using mock data instead.");
+        setProjects(MOCK_PROJECTS);
+        setDbConnected(false);
       } finally {
         setLoading(false);
       }
@@ -116,11 +120,14 @@ function App() {
         setCart(transformedCartItems);
       } catch (err) {
         console.error("Failed to fetch cart items:", err);
+        // Don't set error here as it's not critical
       }
     };
 
-    fetchCart();
-  }, []);
+    if (dbConnected) {
+      fetchCart();
+    }
+  }, [dbConnected]);
 
   const filteredProjects = projects.filter(
     (project) =>
@@ -130,8 +137,10 @@ function App() {
 
   const handleAddToCart = async (project: Project) => {
     try {
-      // Using a mock user ID of 1 for now
-      await addToCart(project.id, 1);
+      if (dbConnected) {
+        // Using a mock user ID of 1 for now
+        await addToCart(project.id, 1);
+      }
 
       // Update local cart state
       if (!cart.find((p) => p.id === project.id)) {
@@ -161,9 +170,6 @@ function App() {
             {loading && (
               <div className="text-center py-4">Loading projects...</div>
             )}
-            {error && (
-              <div className="text-red-500 text-center py-4">{error}</div>
-            )}
 
             <div className="grid grid-cols-1 gap-4 md:gap-6">
               {filteredProjects.map((project) => (
@@ -176,7 +182,7 @@ function App() {
               ))}
             </div>
 
-            {pagination.totalPages > 1 && (
+            {dbConnected && pagination.totalPages > 1 && (
               <div className="flex justify-center mt-6">
                 <button
                   className="px-4 py-2 bg-blue-500 text-white rounded mr-2"
@@ -199,6 +205,12 @@ function App() {
                 >
                   Next
                 </button>
+              </div>
+            )}
+            {!dbConnected && (
+              <div className="bg-gray-100 text-gray-500 text-sm p-2 rounded mb-4 text-center">
+                SQL database not connected. Please configure database
+                connection.
               </div>
             )}
           </div>

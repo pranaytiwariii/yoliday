@@ -21,19 +21,25 @@ A full-stack application for managing projects and cart functionality.
    npm install
    ```
 
-3. Create the database and tables:
+3. Configure the database:
+
+   - Make sure your MySQL server is running
+   - Update the `.env` file with your MySQL credentials:
+     ```
+     DB_HOST=localhost
+     DB_USER=root
+     DB_PASSWORD=your_password
+     DB_NAME=yoliday_db
+     PORT=3001
+     ```
+
+4. Create the database and tables:
 
    ```
-   mysql -u root -p < src/database/schema.sql
+   npm run init-db
    ```
 
-   When prompted, enter your MySQL password (root).
-
-4. Seed the database with sample data:
-
-   ```
-   mysql -u root -p < src/database/seed.sql
-   ```
+   This will create the database, tables, and insert sample data.
 
 5. Start the development server:
    ```
@@ -91,3 +97,16 @@ The frontend application will run on http://localhost:3000.
 - TypeScript
 - MySQL
 - Express Validator for data validation
+
+## Troubleshooting
+
+### Database Connection Issues
+
+If you encounter database connection issues:
+
+1. Check that your MySQL server is running
+2. Verify your credentials in the `.env` file
+3. Make sure the database exists by running `npm run init-db` in the backend directory
+4. Check the MySQL logs for any errors
+
+The frontend will display a notification if the database connection fails and will fall back to using mock data.
